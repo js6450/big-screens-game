@@ -8,7 +8,7 @@ class Ball {
   boolean isDone;
 
   Ball(float x, float y) {
-    r = random(8, 16);
+    r = random(25, 35);
     makeBody(new Vec2(x, y), r);
 
     wind = new Vec2(random(-10, 10), 0);

@@ -1,3 +1,8 @@
+import KinectPV2.KJoint;
+import KinectPV2.*;
+
+KinectPV2 kinect;
+
 import shiffman.box2d.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.common.*;
@@ -15,13 +20,23 @@ float goalH;
 
 int ballMax = 1;
 
+int score = 0;
+int lastMillis = 0;
 
 int goalCount = 0;
 int doneCount = 0;
 
 void setup() {
-  size(960, 480);
+  //size(960, 480);
+  fullScreen();
   smooth();
+
+  kinect = new KinectPV2(this);
+
+  kinect.enableSkeletonColorMap(true);
+  kinect.enableColorImg(true);
+
+  kinect.init();
 
   box2d = new Box2DProcessing(this);
   box2d.createWorld();
@@ -33,18 +48,12 @@ void setup() {
   boundaries = new ArrayList<Boundary>();
   basketWall = new ArrayList<BasketWall>();
 
-  // Add a bunch of fixed boundaries
-  boundaries.add(new Boundary(width/4, height-5, width/2-100, 10));
-  boundaries.add(new Boundary(3*width/4, height-5, width/2-100, 10));
-  boundaries.add(new Boundary(width-5, height/2, 10, height));
-  boundaries.add(new Boundary(5, height/2, 10, height));
-
   Ball p = new Ball(random(width), 10);
   balls.add(p);
 
-  goalW = random(200, 300);
+  goalW = random(150, 250);
   goalH = random(50, 80);
-  goalX = random(width);
+  goalX = random(goalW, width - goalW);
 
   basketWall.add(new BasketWall(goalX, height - goalH / 2, 10, goalH));
   basketWall.add(new BasketWall(goalX + goalW, height - goalH / 2, 10, goalH));
@@ -53,16 +62,44 @@ void setup() {
 void draw() {
   background(255);
 
+  ArrayList<KSkeleton> skeletonArray =  kinect.getSkeletonColorMap();
+
   box2d.step();
 
-  if (mousePressed) {
-    for (Ball b : balls) {
-      Vec2 wind = new Vec2(20, 0);
-      b.applyForce(wind);
+  //individual JOINTS
+  for (int i = 0; i < skeletonArray.size(); i++) {
+    KSkeleton skeleton = (KSkeleton) skeletonArray.get(i);
+    if (skeleton.isTracked()) {
+      KJoint[] joints = skeleton.getJoints();
+
+
+      KJoint hand = joints[KinectPV2.JointType_HandRight];
+      KJoint elbow = joints[KinectPV2.JointType_ElbowRight];
+
+      if (hand.getX() > 0 && hand.getX() < 1920 && elbow.getX() > 0 && elbow.getX() < 1920) {
+        float handX = map(hand.getX(), 0, 1920, 0, width);
+        float handY = map(hand.getY(), 0, 1080, 0, height);
+        float elbowX = map(elbow.getX(), 0, 1920, 0, width);
+        float elbowY = map(elbow.getY(), 0, 1080, 0, height);
+
+        PVector v = new PVector(handX - elbowX, handY - elbowY);
+        float angle = v.heading() * -1;
+
+        if (i < boundaries.size()) {
+          boundaries.get(i).update(handX, handY, angle);
+        } else {
+          boundaries.add(new Boundary(handX, handY, abs(handX - elbowX) + int(random(20, 100)), 25));
+        }
+      }
     }
   }
 
-  boundaries.get(0).update(mouseX, mouseY, PI);
+  if (boundaries.size() > skeletonArray.size()) {
+    for (int i = boundaries.size() - 1; i >= skeletonArray.size(); i--) {
+      boundaries.get(i).killBody();
+      boundaries.remove(i);
+    }
+  }
 
   for (Boundary wall : boundaries) {
     wall.display();
@@ -88,6 +125,11 @@ void draw() {
 
     if (b.inGoal) {
       goalCount++;
+
+      if (millis() - lastMillis > 1000) {
+        lastMillis = millis();
+        score++;
+      }
     }
   }
 
@@ -99,9 +141,9 @@ void draw() {
 
     doneCount = 0;
 
-    goalW = random(200, 300);
+    goalW = random(150, 250);
     goalH = random(50, 80);
-    goalX = random(width);
+    goalX = random(goalW, width - goalW);
 
     for (int i = basketWall.size() - 1; i >= 0; i--) {
       BasketWall b = basketWall.get(i);
@@ -125,6 +167,9 @@ void draw() {
   rectMode(CENTER);
   fill(0, 100);
   rect(goalX + goalW / 2, height - 35, goalW, 70);
-  
+
   popStyle();
+
+  textSize(32);
+  text(score, width - 50, 50);
 }
