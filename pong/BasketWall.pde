@@ -34,7 +34,7 @@ class BasketWall {
     box2d.destroyBody(b);
   }
   
-  void display() {
+  void display(PImage sprite) {
     Vec2 pos = box2d.getBodyPixelCoord(b);
     
     rectMode(CENTER);
@@ -43,6 +43,8 @@ class BasketWall {
     fill(255, 0, 0);
     stroke(0);
     rect(0, 0, w, h);
+    imageMode(CENTER);
+    image(sprite, 0, 0, w, h);
     popMatrix();
   }
 

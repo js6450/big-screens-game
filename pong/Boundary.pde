@@ -7,6 +7,8 @@ class Boundary {
   
   float a;
   
+  float c;
+  
   Body b;
   BodyDef bd;
   PolygonShape sd;
@@ -29,6 +31,8 @@ class Boundary {
     b = box2d.createBody(bd);
     
     b.createFixture(sd,1);
+    
+    c = random(0, 255);
   }
   
   void killBody(){
@@ -50,7 +54,7 @@ class Boundary {
     b.createFixture(sd,1);
   }
 
-  void display() {
+  void display(PImage sprite) {
     
     Vec2 pos = box2d.getBodyPixelCoord(b);
     float a = b.getAngle();
@@ -59,9 +63,12 @@ class Boundary {
     pushMatrix();
     translate(pos.x, pos.y);
     rotate(-a);
-    fill(0);
-    stroke(0);
+    noFill();
+    strokeWeight(3);
+    stroke(c, 255, 255);
     rect(0, 0, w, h);
+    imageMode(CENTER);
+    image(sprite, 0, 0, w, h);
     popMatrix();
   }
 

@@ -41,7 +41,7 @@ class Ball {
   }
 
   // Drawing the box
-  void display() {
+  void display(PImage sprite) {
 
     Vec2 pos = box2d.getBodyPixelCoord(body);
     float a = body.getAngle();
@@ -51,11 +51,13 @@ class Ball {
     pushMatrix();
     translate(pos.x, pos.y);
     rotate(a);
-    fill(150);
-    stroke(0);
-    strokeWeight(1);
-    ellipse(0, 0, r*2, r*2);
-    line(0, 0, r, 0);
+    //fill(150);
+    //stroke(0);
+    //strokeWeight(1);
+    //ellipse(0, 0, r*2, r*2);
+    //line(0, 0, r, 0);
+    imageMode(CENTER);
+    image(sprite, 0,0,r*2,r*2);
     popMatrix();
   }
 

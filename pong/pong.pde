@@ -26,10 +26,19 @@ int lastMillis = 0;
 int goalCount = 0;
 int doneCount = 0;
 
+int timer;
+
+PImage bg;
+PImage ballSprite;
+PImage topSprite;
+PImage bottomSprite;
+PImage boundarySprite;
+
 void setup() {
   //size(960, 480);
   fullScreen();
   smooth();
+  colorMode(HSB);
 
   kinect = new KinectPV2(this);
 
@@ -57,14 +66,27 @@ void setup() {
 
   basketWall.add(new BasketWall(goalX, height - goalH / 2, 10, goalH));
   basketWall.add(new BasketWall(goalX + goalW, height - goalH / 2, 10, goalH));
+  
+  bg = loadImage("bg_black_128bit.png");
+  ballSprite = loadImage("red_32bit.png");
+  topSprite = loadImage("basket_top.png");
+  bottomSprite = loadImage("basket_bottom.png");
+  boundarySprite = loadImage("bound_2.png");
 }
 
 void draw() {
   background(255);
+  imageMode(CORNER);
+  image(bg, 0, 0, width, height);
 
   ArrayList<KSkeleton> skeletonArray =  kinect.getSkeletonColorMap();
 
   box2d.step();
+  
+  pushStyle();
+  imageMode(CENTER);
+  image(topSprite, goalX + goalW / 2, height - 35, goalW, 70);
+  popStyle();
 
   //individual JOINTS
   for (int i = 0; i < skeletonArray.size(); i++) {
@@ -102,15 +124,15 @@ void draw() {
   }
 
   for (Boundary wall : boundaries) {
-    wall.display();
+    wall.display(boundarySprite);
   }
 
-  for (BasketWall wall : basketWall) {
-    wall.display();
-  }
+  //for (BasketWall wall : basketWall) {
+  //  wall.display(basketSprite);
+  //}
 
   for (Ball b : balls) {
-    b.display();
+    b.display(ballSprite);
   }
 
   for (int i = balls.size()-1; i >= 0; i--) {
@@ -165,11 +187,12 @@ void draw() {
 
   pushStyle();
   rectMode(CENTER);
-  fill(0, 100);
-  rect(goalX + goalW / 2, height - 35, goalW, 70);
-
+  //fill(0, 100);
+  //rect(goalX + goalW / 2, height - 35, goalW, 70);
+  imageMode(CENTER);
+  image(bottomSprite, goalX + goalW / 2, height - 35, goalW, 70);
   popStyle();
 
-  textSize(32);
+  textSize(48);
   text(score, width - 50, 50);
 }
