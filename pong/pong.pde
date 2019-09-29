@@ -186,13 +186,16 @@ void draw() {
   }
 
   pushStyle();
-  rectMode(CENTER);
+  //rectMode(CENTER);
   //fill(0, 100);
   //rect(goalX + goalW / 2, height - 35, goalW, 70);
   imageMode(CENTER);
   image(bottomSprite, goalX + goalW / 2, height - 35, goalW, 70);
   popStyle();
 
-  textSize(48);
-  text(score, width - 50, 50);
+  textSize(64);
+  textAlign(CENTER);
+  //image(bottomSprite, width/2, 25, 100, 80);
+  fill(255,255,255,200);
+  text(score, width / 2, 75);
 }
